@@ -30,9 +30,11 @@ function buildBoard() {
       }
     }
   }
-  board[0][1].isMine = true
-  board[1][1].isMine = true
-
+  // board[0][1].isMine = true
+  // board[1][1].isMine = true
+  // מקום רנדומלי למוקשים
+  putMinesOnRandEmptyLocations(board)
+  // עדכון לולאת שכנים בהתאם למיקום המוקשים
   updateMinesNegCount(board)
 
   return board
@@ -95,3 +97,29 @@ function onCellClicked(elCell, i, j) {
   console.log(`i:${i},j:${j}`)
   console.log(elCell)
 }
+
+/// === אלגוריתם רנדומלי למציאת מקום לריק למוקש ====
+
+// לשקול להוריד את הבדיקה אם התא ריק
+function findEmptyCell(board) {
+  var emptyCells = []
+  for (var i = 0; i < board.length; i++) {
+    for (var j = 0; j < board[i].length; j++) {
+      var currCell = board[i][j]
+      if (currCell.isMine === false) {
+        emptyCells.push({ i, j })
+      }
+    }
+  }
+  var randIdx = getRandomIntInclusive(0, emptyCells.length - 1)
+  var emptyCellLocation = emptyCells[randIdx]
+  return emptyCellLocation
+}
+
+function putMinesOnRandEmptyLocations(board) {
+  for (var i = 0; i < gLevel.MINES; i++) {
+    var location = findEmptyCell(board)
+    board[location.i][location.j].isMine = true
+  }
+}
+// ==================================================== //
