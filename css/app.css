@@ -7,16 +7,43 @@ body {
 
 table {
   background-color: grey;
-  margin: 100px auto;
+  margin: 30px auto;
   border: 1px solid lightgray;
 }
 
 .cell {
   color: grey;
-  border: 1px solid lightgray;
+  border: 1px solid rgb(90, 90, 90);
   width: 40px;
   height: 40px;
   font-size: 1.5em;
   cursor: pointer;
   transition: 0.5s;
+}
+
+.cell.clicked {
+  color: black;
+  border: 1px solid rgb(90, 90, 90);
+  background-color: rgb(202, 202, 202);
+  box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.2), -4px -4px 6px rgba(255, 255, 255, 0.7);
+}
+
+.restart {
+  margin-top: 40px;
+}
+
+.restart .smiley {
+  all: unset; /* מנקה את כל המאפיינים הדיפולטיביים של הכפתור */
+  font-size: 25px; /* גודל הסמיילי */
+  cursor: pointer; /* מצביע עכבר */
+  padding: 0px; /* רווח פנימי למגע נעים */
+  line-height: 1; /* למנוע רווחים מיותרים */
+}
+
+.restart .smiley:active {
+  transform: scale(0.9); /* הקטנה בעת לחיצה */
+}
+
+footer {
+  font-size: 10px;
 }

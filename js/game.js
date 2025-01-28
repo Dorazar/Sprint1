@@ -2,10 +2,12 @@
 var gBoard
 
 const MINE = '💣'
+const LIVES = '🛟'
 
 var gLevel = {
   SIZE: 4,
   MINES: 2,
+  LIVES: 3,
 }
 
 var gGame = { isOn: false, shownCount: 0, markedCount: 0, secsPassed: 0 }
@@ -13,6 +15,7 @@ var gGame = { isOn: false, shownCount: 0, markedCount: 0, secsPassed: 0 }
 function onInit() {
   gBoard = buildBoard()
   renderBoard(gBoard, '.board-container')
+  lives(gLevel.LIVES)
 }
 
 function buildBoard() {
@@ -38,20 +41,34 @@ function buildBoard() {
 }
 
 function onCellClicked(elCell, i, j) {
+  if (!gLevel.LIVES) {
+    console.log('game over')
+    //add game over function
+    gGame.isOn = false
+    gameOver()
+    return
+  }
+
   if (!gBoard[i][j].isMine) {
+    gGame.isOn = true
     // elCell.innerHTML = gBoard[i][j].minesAroundCount
-    elCell.style.color = 'black'
+    // elCell.style.color = 'black'
+    elCell.classList.add('clicked')
     gBoard[i][j].isShow = true
-    //ניסיון לבדוק איך אפשר לעשות את המטריצה בלחיצה הראשונה בלי מוקשים
     gBoard[0][1].isMine = true
     gBoard[1][1].isMine = true
+    gBoard[3][0].isMine = true
     updateMinesNegCount(gBoard)
     console.log(`i:${i},j:${j}`)
     console.log(elCell)
     console.log(gBoard[i][j])
     renderCell({ i, j }, gBoard[i][j].minesAroundCount)
-  } else {
+  } else if (gBoard[i][j].isMine) {
+    console.log('press on mine!')
+    elCell.classList.add('clicked')
     renderCell({ i, j }, MINE)
+    gLevel.LIVES--
+    lives()
   }
 }
 
@@ -121,3 +138,37 @@ function getClassName(location) {
   const cellClass = 'cell-' + location.i + '-' + location.j
   return cellClass
 }
+
+function lives() {
+  var leftLives = gLevel.LIVES
+  console.log(leftLives)
+  var elLives = document.querySelector('.lives span')
+  switch (leftLives) {
+    case 3:
+      elLives.innerHTML = '🛟🛟🛟'
+      break
+    case 2:
+      elLives.innerHTML = '🛟🛟'
+      break
+    case 1:
+      elLives.innerHTML = '🛟'
+      break
+    case 0:
+      elLives.innerHTML = '☠️'
+      break
+    default:
+      break
+  }
+}
+
+function onRestart() {
+  gLevel.LIVES = 3
+  onInit()
+}
+
+function gameOver() {
+  var elSmiley = document.querySelector('.smiley')
+  elSmiley.innerHTML = '🤯'
+}
+
+function isVictory() {}
