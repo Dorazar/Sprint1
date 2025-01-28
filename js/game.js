@@ -41,6 +41,8 @@ function buildBoard() {
 }
 
 function onCellClicked(elCell, i, j) {
+  if (gBoard[i][j].isShow) return
+
   if (!gLevel.LIVES) {
     console.log('game over')
     //add game over function
@@ -55,6 +57,7 @@ function onCellClicked(elCell, i, j) {
     // elCell.style.color = 'black'
     elCell.classList.add('clicked')
     gBoard[i][j].isShow = true
+
     gBoard[0][1].isMine = true
     gBoard[1][1].isMine = true
     gBoard[3][0].isMine = true
@@ -69,6 +72,13 @@ function onCellClicked(elCell, i, j) {
     renderCell({ i, j }, MINE)
     gLevel.LIVES--
     lives()
+    if (!gLevel.LIVES) {
+      console.log('game over')
+      //add game over function
+      gGame.isOn = false
+      gameOver()
+      return
+    }
   }
 }
 
@@ -172,3 +182,7 @@ function gameOver() {
 }
 
 function isVictory() {}
+
+function onCellClickedMarkFlag(ev) {
+  console.log(ev)
+}

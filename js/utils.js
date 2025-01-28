@@ -14,8 +14,8 @@ function renderBoard(mat, selector) {
       var cell = currCell.isMine ? (cell = MINE) : (cell = currCell.minesAroundCount)
       const className = `cell cell-${i}-${j}`
 
-      strHTML += `<td class="${className}" onclick=onCellClicked(this,${i},${j})
-      ><span hidden>${cell}</span> </td>`
+      strHTML += `<td class="${className}" onclick=onCellClicked(this,${i},${j});onCellClickedMarkFlag(event)
+      >${cell}</td>`
     }
 
     strHTML += '</tr>'
