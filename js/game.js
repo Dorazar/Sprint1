@@ -12,8 +12,6 @@ var gGame = { isOn: false, shownCount: 0, markedCount: 0, secsPassed: 0 }
 
 function onInit() {
   gBoard = buildBoard()
-  console.table(gBoard)
-
   renderBoard(gBoard, '.board-container')
 }
 
@@ -33,34 +31,31 @@ function buildBoard() {
   // board[0][1].isMine = true
   // board[1][1].isMine = true
   // מקום רנדומלי למוקשים
-  putMinesOnRandEmptyLocations(board)
+  // putMinesOnRandEmptyLocations(board)
   // עדכון לולאת שכנים בהתאם למיקום המוקשים
-  updateMinesNegCount(board)
-
+  // updateMinesNegCount(board)
   return board
 }
 
-function renderBoard(mat, selector) {
-  var strHTML = '<table><tbody>'
-  for (var i = 0; i < mat.length; i++) {
-    strHTML += '<tr>'
-    for (var j = 0; j < mat[0].length; j++) {
-      var currCell = mat[i][j]
-      var cell = currCell.isMine ? (cell = MINE) : (cell = currCell.minesAroundCount)
-      const className = `cell cell-${i}-${j}`
-
-      strHTML += `<td class="${className}" onclick=onCellClicked(this,${i},${j})> ${cell}</td>`
-    }
-
-    strHTML += '</tr>'
+function onCellClicked(elCell, i, j) {
+  if (!gBoard[i][j].isMine) {
+    // elCell.innerHTML = gBoard[i][j].minesAroundCount
+    elCell.style.color = 'black'
+    gBoard[i][j].isShow = true
+    //ניסיון לבדוק איך אפשר לעשות את המטריצה בלחיצה הראשונה בלי מוקשים
+    gBoard[0][1].isMine = true
+    gBoard[1][1].isMine = true
+    updateMinesNegCount(gBoard)
+    console.log(`i:${i},j:${j}`)
+    console.log(elCell)
+    console.log(gBoard[i][j])
+    renderCell({ i, j }, gBoard[i][j].minesAroundCount)
+  } else {
+    renderCell({ i, j }, MINE)
   }
-  strHTML += '</tbody></table>'
-
-  const elContainer = document.querySelector(selector)
-  elContainer.innerHTML = strHTML
 }
 
-// לולאת שכנים
+//לולאת שכנים לספירת מס המוקשים השכנים
 function setMinesNegsCount(pos, board) {
   var neighs = 0
   for (var i = pos.i - 1; i <= pos.i + 1; i++) {
@@ -73,6 +68,7 @@ function setMinesNegsCount(pos, board) {
       if (currCell.isMine) {
         neighs++
       }
+
       // console.log(`i:${i},j:${j},${currCell}`)
     }
   }
@@ -90,36 +86,38 @@ function updateMinesNegCount(board) {
   }
 }
 
-function onCellClicked(elCell, i, j) {
-  if (gBoard[i][j] === MINE) return
-
-  elCell.style.color = 'black'
-  console.log(`i:${i},j:${j}`)
-  console.log(elCell)
-}
-
 /// === אלגוריתם רנדומלי למציאת מקום לריק למוקש ====
 
 // לשקול להוריד את הבדיקה אם התא ריק
-function findEmptyCell(board) {
-  var emptyCells = []
-  for (var i = 0; i < board.length; i++) {
-    for (var j = 0; j < board[i].length; j++) {
-      var currCell = board[i][j]
-      if (currCell.isMine === false) {
-        emptyCells.push({ i, j })
-      }
-    }
-  }
-  var randIdx = getRandomIntInclusive(0, emptyCells.length - 1)
-  var emptyCellLocation = emptyCells[randIdx]
-  return emptyCellLocation
-}
+// function findEmptyCell(board) {
+//   var emptyCells = []
+//   for (var i = 0; i < board.length; i++) {
+//     for (var j = 0; j < board[i].length; j++) {
+//       var currCell = board[i][j]
+//       if (currCell.isMine === false) {
+//         emptyCells.push({ i, j })
+//       }
+//     }
+//   }
+//   var randIdx = getRandomIntInclusive(0, emptyCells.length - 1)
+//   var emptyCellLocation = emptyCells[randIdx]
+//   return emptyCellLocation
+// }
 
-function putMinesOnRandEmptyLocations(board) {
-  for (var i = 0; i < gLevel.MINES; i++) {
-    var location = findEmptyCell(board)
-    board[location.i][location.j].isMine = true
-  }
-}
+// function putMinesOnRandEmptyLocations(board) {
+//   for (var i = 0; i < gLevel.MINES; i++) {
+//     var location = findEmptyCell(board)
+//     board[location.i][location.j].isMine = true
+//   }
+// }
 // ==================================================== //
+
+function renderCell(location, value) {
+  const cellSelector = '.' + getClassName(location)
+  const elCell = document.querySelector(cellSelector)
+  elCell.innerHTML = value
+}
+function getClassName(location) {
+  const cellClass = 'cell-' + location.i + '-' + location.j
+  return cellClass
+}
