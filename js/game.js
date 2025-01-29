@@ -4,6 +4,8 @@ var gBoard
 const MINE = '💣'
 const LIVES = '🛟'
 
+var gEmptyCells
+
 var gLevel = {
   SIZE: 4,
   MINES: 2,
@@ -41,46 +43,108 @@ function buildBoard() {
 }
 
 function onCellClicked(elCell, i, j) {
+  if (gBoard[i][j].isMarked) return
   if (gBoard[i][j].isShow) return
+  // gBoard[0][1].isMine = true
+  // gBoard[1][1].isMine = true
 
-  if (!gLevel.LIVES) {
-    console.log('game over')
-    //add game over function
-    gGame.isOn = false
-    gameOver()
-    return
+  // מה שקורה בהתחלה
+  if (!gGame.isOn) {
+    putMinesOnRandEmptyLocations(gBoard)
+    updateMinesNegCount(gBoard)
+    if (gBoard[i][j].minesAroundCount === 0) {
+      console.log(elCell)
+    }
+    // אם בלחיצה הראשונה פגשתי במוקש, תזוז
+    if (gBoard[i][j].isMine) {
+      gBoard[i][j].isMine = false
+      console.log(`it was a bomb! at first click ${i},${j}`)
+      // שינוי מיקום של הפצצה
+      var newMineIdx = getRandomIntInclusive(0, gEmptyCells.length - 1)
+      var newMineLocation = gEmptyCells[newMineIdx]
+      console.log(`the bomb move to ${newMineLocation.i},${newMineLocation.j}`)
+      gBoard[newMineLocation.i][newMineLocation.j].isMine = true
+      renderCell(newMineLocation, gBoard[i][j].minesAroundCount)
+      updateMinesNegCount(gBoard)
+    }
+    if (gBoard[i][j].minesAroundCount === 0) {
+      console.log(`Cell (${i},${j}) is 0, expanding...`)
+      expandUncover(gBoard, elCell, i, j)
+    }
+
+    renderCell({ i, j }, gBoard[i][j].minesAroundCount)
+    updateMinesNegCount(gBoard)
+    gGame.isOn = true
   }
 
-  if (!gBoard[i][j].isMine) {
-    gGame.isOn = true
+  if (gGame.isOn & !gBoard[i][j].isMine) {
     // elCell.innerHTML = gBoard[i][j].minesAroundCount
     // elCell.style.color = 'black'
     elCell.classList.add('clicked')
     gBoard[i][j].isShow = true
 
-    gBoard[0][1].isMine = true
-    gBoard[1][1].isMine = true
-    gBoard[3][0].isMine = true
-    updateMinesNegCount(gBoard)
-    console.log(`i:${i},j:${j}`)
-    console.log(elCell)
-    console.log(gBoard[i][j])
     renderCell({ i, j }, gBoard[i][j].minesAroundCount)
-  } else if (gBoard[i][j].isMine) {
+  }
+
+  if (gGame.isOn & gBoard[i][j].isMine) {
     console.log('press on mine!')
     elCell.classList.add('clicked')
     renderCell({ i, j }, MINE)
-    gLevel.LIVES--
-    lives()
-    if (!gLevel.LIVES) {
-      console.log('game over')
-      //add game over function
-      gGame.isOn = false
-      gameOver()
-      return
-    }
   }
 }
+
+function expandUncover(board, elCell, i, j) {
+  var neighs = []
+  var pos = { i, j }
+  for (var i = pos.i - 1; i <= pos.i + 1; i++) {
+    if (i < 0 || i > board.length - 1) continue
+    for (var j = pos.j - 1; j <= pos.j + 1; j++) {
+      if (j < 0 || j > board[0].length - 1) continue
+      if ((pos.i === i) & (pos.j === j)) continue
+      neighs.push({ i, j })
+    }
+  }
+  console.log('neighs:', neighs)
+  for (var i = 0; i < neighs.length; i++) {
+    var currNeigh = neighs[i]
+    board[currNeigh.i][currNeigh.j].isShow = true
+    var className = '.' + getClassName(currNeigh)
+    console.log('className:', className)
+    var elCell = document.querySelector(className)
+    console.log('elCell:', elCell)
+    renderCell(currNeigh, board[currNeigh.i][currNeigh.j].minesAroundCount)
+    elCell.classList.add('clicked')
+  }
+}
+
+/// === אלגוריתם רנדומלי למציאת מקום לריק למוקש ====
+
+// לשקול להוריד את הבדיקה אם התא ריק
+function findEmptyCell(board) {
+  gEmptyCells = []
+  for (var i = 0; i < board.length; i++) {
+    for (var j = 0; j < board[i].length; j++) {
+      var currCell = board[i][j]
+      if (!currCell.isMine) {
+        gEmptyCells.push({ i, j })
+      }
+    }
+  }
+  var randIdx = getRandomIntInclusive(0, gEmptyCells.length - 1)
+  var emptyCellLocation = gEmptyCells[randIdx]
+
+  return emptyCellLocation
+}
+
+function putMinesOnRandEmptyLocations(board) {
+  for (var i = 0; i < gLevel.MINES; i++) {
+    var location = findEmptyCell(board)
+    board[location.i][location.j].isMine = true
+    gEmptyCells.splice(gEmptyCells.indexOf(location), 1)
+  }
+  // console.log('emptyCells:', gEmptyCells)
+}
+// ==================================================== //
 
 //לולאת שכנים לספירת מס המוקשים השכנים
 function setMinesNegsCount(pos, board) {
@@ -113,32 +177,6 @@ function updateMinesNegCount(board) {
   }
 }
 
-/// === אלגוריתם רנדומלי למציאת מקום לריק למוקש ====
-
-// לשקול להוריד את הבדיקה אם התא ריק
-// function findEmptyCell(board) {
-//   var emptyCells = []
-//   for (var i = 0; i < board.length; i++) {
-//     for (var j = 0; j < board[i].length; j++) {
-//       var currCell = board[i][j]
-//       if (currCell.isMine === false) {
-//         emptyCells.push({ i, j })
-//       }
-//     }
-//   }
-//   var randIdx = getRandomIntInclusive(0, emptyCells.length - 1)
-//   var emptyCellLocation = emptyCells[randIdx]
-//   return emptyCellLocation
-// }
-
-// function putMinesOnRandEmptyLocations(board) {
-//   for (var i = 0; i < gLevel.MINES; i++) {
-//     var location = findEmptyCell(board)
-//     board[location.i][location.j].isMine = true
-//   }
-// }
-// ==================================================== //
-
 function renderCell(location, value) {
   const cellSelector = '.' + getClassName(location)
   const elCell = document.querySelector(cellSelector)
@@ -151,7 +189,6 @@ function getClassName(location) {
 
 function lives() {
   var leftLives = gLevel.LIVES
-  console.log(leftLives)
   var elLives = document.querySelector('.lives span')
   switch (leftLives) {
     case 3:
@@ -181,8 +218,39 @@ function gameOver() {
   elSmiley.innerHTML = '🤯'
 }
 
-function isVictory() {}
+function onCellMarked(ev) {
+  if (ev.button === 2) {
+    ev.preventDefault() // מניעת תפריט ההקשר של הדפדפן
 
-function onCellClickedMarkFlag(ev) {
-  console.log(ev)
+    var classNameCell = '.' + ev.srcElement.classList[1]
+    var elCell = document.querySelector(classNameCell)
+
+    // console.log(classNameCell.indexOf('-') + 1)
+    // console.log(classNameCell.indexOf('-', classNameCell.indexOf('-') + 1) + 1)
+
+    // find the indexes of {i,j} of the cell
+    var cellIdx = {
+      i: +classNameCell[classNameCell.indexOf('-') + 1],
+      j: +classNameCell[classNameCell.indexOf('-', classNameCell.indexOf('-') + 1) + 1],
+    }
+    // you cant mark a cell if it show!
+    if (gBoard[cellIdx.i][cellIdx.j].isShow) return
+
+    if (!gBoard[cellIdx.i][cellIdx.j].isMarked) {
+      //Model Update:
+      gBoard[cellIdx.i][cellIdx.j].isMarked = true
+      //Dom Update:
+      elCell.innerHTML = '🚩'
+    } else if (gBoard[cellIdx.i][cellIdx.j].isMarked) {
+      //Model Update:
+      gBoard[cellIdx.i][cellIdx.j].isMarked = false
+      //Dom Update:
+      elCell.innerHTML = ''
+    }
+
+    // console.log('cellIdx.i:', cellIdx.i)
+    // console.log('cellIdx.j:', cellIdx.j)
+  }
 }
+
+function isVictory() {}
