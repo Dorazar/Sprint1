@@ -5,10 +5,11 @@ const MINE = '💣'
 const LIVES = '🛟'
 
 var gEmptyCells
+var gLeftLives
 
 var gLevel = {
-  SIZE: 4,
-  MINES: 2,
+  SIZE: 8,
+  MINES: 14,
   LIVES: 3,
 }
 
@@ -17,7 +18,7 @@ var gGame = { isOn: false, shownCount: 0, markedCount: 0, secsPassed: 0 }
 function onInit() {
   gBoard = buildBoard()
   renderBoard(gBoard, '.board-container')
-  lives(gLevel.LIVES)
+  gLeftLives = gLevel.LIVES
 }
 
 function buildBoard() {
@@ -45,6 +46,7 @@ function buildBoard() {
 function onCellClicked(elCell, i, j) {
   if (gBoard[i][j].isMarked) return
   if (gBoard[i][j].isShow) return
+
   // gBoard[0][1].isMine = true
   // gBoard[1][1].isMine = true
 
@@ -89,7 +91,26 @@ function onCellClicked(elCell, i, j) {
   if (gGame.isOn & gBoard[i][j].isMine) {
     console.log('press on mine!')
     elCell.classList.add('clicked')
+    elCell.classList.add('mine')
+    gBoard[i][j].isShow = true
     renderCell({ i, j }, MINE)
+    var elSmiley = document.querySelector('.smiley')
+    elSmiley.innerHTML = '🤯'
+    lives(-1)
+    if (gLeftLives === 0) {
+      gBoard[i][j].isShow = false
+      return
+    }
+    setTimeout(() => {
+      var elSmiley = document.querySelector('.smiley')
+      elSmiley.innerHTML = '😀'
+      elCell.classList.remove('clicked')
+      elCell.classList.remove('mine')
+      gBoard[i][j].isShow = false
+      renderCell({ i, j }, '')
+    }, 1000)
+
+    // gameOver()
   }
 }
 
@@ -187,10 +208,12 @@ function getClassName(location) {
   return cellClass
 }
 
-function lives() {
-  var leftLives = gLevel.LIVES
+function lives(num) {
+  console.log('gLeftLives:', gLeftLives)
+  gLeftLives += num
+
   var elLives = document.querySelector('.lives span')
-  switch (leftLives) {
+  switch (gLeftLives) {
     case 3:
       elLives.innerHTML = '🛟🛟🛟'
       break
@@ -202,6 +225,7 @@ function lives() {
       break
     case 0:
       elLives.innerHTML = '☠️'
+      gameOver()
       break
     default:
       break
@@ -210,12 +234,35 @@ function lives() {
 
 function onRestart() {
   gLevel.LIVES = 3
+  var elLives = document.querySelector('.lives span')
+  elLives.innerHTML = '🛟🛟🛟'
+  var elSmiley = document.querySelector('.smiley')
+  elSmiley.innerHTML = '😀'
   onInit()
 }
 
 function gameOver() {
+  // אם לחצנו על מוקש, כל המוקשים נגלים
+  var minesLocation = []
+  for (var i = 0; i < gBoard.length; i++) {
+    for (var j = 0; j < gBoard[i].length; j++) {
+      var currCell = gBoard[i][j]
+      if (currCell.isMine) {
+        minesLocation.push({ i, j })
+      }
+    }
+  }
+  for (var i = 0; i < minesLocation.length; i++) {
+    var currMine = minesLocation[i]
+    gBoard[currMine.i][currMine.j].isMine = true
+    renderCell(currMine, MINE)
+    var elClassName = '.' + getClassName(currMine)
+    var elCell = document.querySelector(elClassName)
+    elCell.classList.add('clicked')
+  }
   var elSmiley = document.querySelector('.smiley')
   elSmiley.innerHTML = '🤯'
+  gGame.isOn = false
 }
 
 function onCellMarked(ev) {
