@@ -7,9 +7,12 @@ const LIVES = '🛟'
 var gEmptyCells
 var gLeftLives
 
+var gStartTime
+var gTimerInterval
+
 var gLevel = {
-  SIZE: 8,
-  MINES: 14,
+  SIZE: 4,
+  MINES: 2,
   LIVES: 3,
 }
 
@@ -18,6 +21,11 @@ var gGame = { isOn: false, shownCount: 0, markedCount: 0, secsPassed: 0 }
 function onInit() {
   gBoard = buildBoard()
   renderBoard(gBoard, '.board-container')
+  gGame.isOn = false
+  gGame.shownCount = 0
+  gGame.markedCount = 0
+  shownCount()
+  markedCount()
   gLeftLives = gLevel.LIVES
 }
 
@@ -46,31 +54,32 @@ function buildBoard() {
 function onCellClicked(elCell, i, j) {
   if (gBoard[i][j].isMarked) return
   if (gBoard[i][j].isShow) return
-
+  if (gLeftLives <= 0) return
   // gBoard[0][1].isMine = true
   // gBoard[1][1].isMine = true
 
   // מה שקורה בהתחלה
   if (!gGame.isOn) {
+    startStopwatch()
     putMinesOnRandEmptyLocations(gBoard)
     updateMinesNegCount(gBoard)
-    if (gBoard[i][j].minesAroundCount === 0) {
-      console.log(elCell)
-    }
+    // if (gBoard[i][j].minesAroundCount === 0) {
+    //   console.log(elCell)
+    // }
     // אם בלחיצה הראשונה פגשתי במוקש, תזוז
     if (gBoard[i][j].isMine) {
       gBoard[i][j].isMine = false
-      console.log(`it was a bomb! at first click ${i},${j}`)
+      // console.log(`it was a bomb! at first click ${i},${j}`)
       // שינוי מיקום של הפצצה
       var newMineIdx = getRandomIntInclusive(0, gEmptyCells.length - 1)
       var newMineLocation = gEmptyCells[newMineIdx]
-      console.log(`the bomb move to ${newMineLocation.i},${newMineLocation.j}`)
+      // console.log(`the bomb move to ${newMineLocation.i},${newMineLocation.j}`)
       gBoard[newMineLocation.i][newMineLocation.j].isMine = true
       renderCell(newMineLocation, gBoard[i][j].minesAroundCount)
       updateMinesNegCount(gBoard)
     }
     if (gBoard[i][j].minesAroundCount === 0) {
-      console.log(`Cell (${i},${j}) is 0, expanding...`)
+      // console.log(`Cell (${i},${j}) is 0, expanding...`)
       expandUncover(gBoard, elCell, i, j)
     }
 
@@ -112,6 +121,10 @@ function onCellClicked(elCell, i, j) {
 
     // gameOver()
   }
+
+  shownCount()
+  //check if victory after the press
+  isVictory()
 }
 
 function expandUncover(board, elCell, i, j) {
@@ -125,14 +138,14 @@ function expandUncover(board, elCell, i, j) {
       neighs.push({ i, j })
     }
   }
-  console.log('neighs:', neighs)
+  // console.log('neighs:', neighs)
   for (var i = 0; i < neighs.length; i++) {
     var currNeigh = neighs[i]
     board[currNeigh.i][currNeigh.j].isShow = true
     var className = '.' + getClassName(currNeigh)
-    console.log('className:', className)
+    // console.log('className:', className)
     var elCell = document.querySelector(className)
-    console.log('elCell:', elCell)
+    // console.log('elCell:', elCell)
     renderCell(currNeigh, board[currNeigh.i][currNeigh.j].minesAroundCount)
     elCell.classList.add('clicked')
   }
@@ -140,7 +153,6 @@ function expandUncover(board, elCell, i, j) {
 
 /// === אלגוריתם רנדומלי למציאת מקום לריק למוקש ====
 
-// לשקול להוריד את הבדיקה אם התא ריק
 function findEmptyCell(board) {
   gEmptyCells = []
   for (var i = 0; i < board.length; i++) {
@@ -198,16 +210,6 @@ function updateMinesNegCount(board) {
   }
 }
 
-function renderCell(location, value) {
-  const cellSelector = '.' + getClassName(location)
-  const elCell = document.querySelector(cellSelector)
-  elCell.innerHTML = value
-}
-function getClassName(location) {
-  const cellClass = 'cell-' + location.i + '-' + location.j
-  return cellClass
-}
-
 function lives(num) {
   console.log('gLeftLives:', gLeftLives)
   gLeftLives += num
@@ -225,7 +227,7 @@ function lives(num) {
       break
     case 0:
       elLives.innerHTML = '☠️'
-      gameOver()
+      markAllmines()
       break
     default:
       break
@@ -238,10 +240,11 @@ function onRestart() {
   elLives.innerHTML = '🛟🛟🛟'
   var elSmiley = document.querySelector('.smiley')
   elSmiley.innerHTML = '😀'
+  resetStopwatch()
   onInit()
 }
 
-function gameOver() {
+function markAllmines() {
   // אם לחצנו על מוקש, כל המוקשים נגלים
   var minesLocation = []
   for (var i = 0; i < gBoard.length; i++) {
@@ -262,10 +265,12 @@ function gameOver() {
   }
   var elSmiley = document.querySelector('.smiley')
   elSmiley.innerHTML = '🤯'
-  gGame.isOn = false
+  stopStopwatch()
 }
 
 function onCellMarked(ev) {
+  if (isVictory()) return
+  console.log('hi:')
   if (ev.button === 2) {
     ev.preventDefault() // מניעת תפריט ההקשר של הדפדפן
 
@@ -286,8 +291,11 @@ function onCellMarked(ev) {
     if (!gBoard[cellIdx.i][cellIdx.j].isMarked) {
       //Model Update:
       gBoard[cellIdx.i][cellIdx.j].isMarked = true
+
       //Dom Update:
       elCell.innerHTML = '🚩'
+      if (isVictory()) {
+      }
     } else if (gBoard[cellIdx.i][cellIdx.j].isMarked) {
       //Model Update:
       gBoard[cellIdx.i][cellIdx.j].isMarked = false
@@ -297,7 +305,76 @@ function onCellMarked(ev) {
 
     // console.log('cellIdx.i:', cellIdx.i)
     // console.log('cellIdx.j:', cellIdx.j)
+    markedCount()
   }
 }
 
-function isVictory() {}
+function onDiffchose(elBtn) {
+  console.log('elBtn.innerHTML:', elBtn.innerHTML)
+  if (elBtn.innerHTML === 'Beginner') {
+    gLevel.SIZE = 4
+    gLevel.MINES = 2
+  } else if (elBtn.innerHTML === 'Medium') {
+    gLevel.SIZE = 8
+    gLevel.MINES = 14
+  } else if (elBtn.innerHTML === 'Expert') {
+    gLevel.SIZE = 12
+    gLevel.MINES = 32
+  }
+
+  onRestart()
+}
+
+function isVictory() {
+  var ifEmpty = []
+  for (var i = 0; i < gBoard.length; i++) {
+    for (let j = 0; j < gBoard[i].length; j++) {
+      var currCell = gBoard[i][j]
+      if (
+        (currCell.isMine === true && currCell.isMarked === false) ||
+        (currCell.isMine === false && currCell.isShow === false)
+      ) {
+        // console.log(`push the idx:${i},${j}`)
+        ifEmpty.push(currCell)
+      }
+    }
+  }
+  // console.log('ifEmpty:', ifEmpty)
+  if (ifEmpty.length === 0) {
+    console.log('win')
+    gGame.isOn = false
+    var elSmiley = document.querySelector('.smiley')
+    elSmiley.innerHTML = '😎'
+    stopStopwatch()
+    return true
+  }
+  return false
+}
+
+function shownCount() {
+  gGame.shownCount = 0
+  for (var i = 0; i < gBoard.length; i++) {
+    for (var j = 0; j < gBoard[i].length; j++) {
+      var currCell = gBoard[i][j]
+      if (currCell.isShow & !currCell.isMine) {
+        gGame.shownCount++
+      }
+    }
+  }
+  var elCell = document.querySelector('.numsgame .showcount')
+  elCell.innerHTML = gGame.shownCount
+}
+
+function markedCount() {
+  gGame.markedCount = 0
+  for (var i = 0; i < gBoard.length; i++) {
+    for (var j = 0; j < gBoard[i].length; j++) {
+      var currCell = gBoard[i][j]
+      if (currCell.isMarked) {
+        gGame.markedCount++
+      }
+    }
+  }
+  var elCell = document.querySelector('.numsgame .markedcount')
+  elCell.innerHTML = gGame.markedCount
+}

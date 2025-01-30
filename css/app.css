@@ -7,7 +7,7 @@ body {
 
 table {
   background-color: grey;
-  margin: 30px auto;
+  margin: 15px auto;
   border: 1px solid lightgray;
 }
 
@@ -35,7 +35,7 @@ table {
 }
 
 .restart {
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
 .restart .smiley {
@@ -52,4 +52,23 @@ table {
 
 footer {
   font-size: 10px;
+}
+
+.beginner,
+.medium,
+.expert {
+  margin: 5px;
+  cursor: pointer; /* מצביע עכבר */
+}
+
+.lives {
+  margin: 15px auto;
+}
+
+.buttons {
+  margin: 15px auto;
+}
+
+.lives span {
+  font-size: 20px;
 }

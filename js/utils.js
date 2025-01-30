@@ -25,3 +25,13 @@ function renderBoard(mat, selector) {
   const elContainer = document.querySelector(selector)
   elContainer.innerHTML = strHTML
 }
+
+function renderCell(location, value) {
+  const cellSelector = '.' + getClassName(location)
+  const elCell = document.querySelector(cellSelector)
+  elCell.innerHTML = value
+}
+function getClassName(location) {
+  const cellClass = 'cell-' + location.i + '-' + location.j
+  return cellClass
+}

@@ -8,7 +8,22 @@
   </head>
   <body onload="onInit()"></body>
   <h1>Mine Sweeper</h1>
+
   <div class="lives">Lives:<span>🛟🛟🛟</span></div>
+
+  <div class="numsgame">
+    <div>
+      showcount: <span class="showcount">0</span> &nbsp;| &nbsp;markedcount:
+      <span class="markedcount">0</span> &nbsp;|&nbsp; timer:
+      <span class="timer">00:00:00</span>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button class="beginner" onclick="onDiffchose(this)">Beginner</button>
+    <button class="medium" onclick="onDiffchose(this)">Medium</button>
+    <button class="expert" onclick="onDiffchose(this)">Expert</button>
+  </div>
   <div class="restart">
     <button class="smiley" onclick="onRestart()">😀</button>
   </div>
@@ -16,4 +31,5 @@
   <footer>Created by Dor Azar</footer>
   <script src="js/game.js"></script>
   <script src="js/utils.js"></script>
+  <script src="js/stopwatch.js"></script>
 </html>
