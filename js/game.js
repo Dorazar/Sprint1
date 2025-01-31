@@ -245,6 +245,8 @@ function lives(num) {
 }
 
 function onRestart() {
+  var elSafeClickText = document.querySelector('.safeclicktext span')
+  elSafeClickText.innerHTML = 3
   gLevel.LIVES = 3
   var elLives = document.querySelector('.lives span')
   elLives.innerHTML = '🛟🛟🛟'
@@ -495,7 +497,7 @@ function safeClick() {
   gSafeLocations.splice(randIdx, 1)
   gMaxSafeLocations--
   var elClicksAvailable = document.querySelector('.safeclicktext span')
-  console.log(elClicksAvailable)
+  // console.log(elClicksAvailable)
   elClicksAvailable.innerHTML = gMaxSafeLocations
 }
 
