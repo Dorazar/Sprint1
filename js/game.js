@@ -10,6 +10,13 @@ var gLeftLives
 var gStartTime
 var gTimerInterval
 
+// hints
+var gHints
+var hintIsOn = false
+
+var gSafeLocations = []
+var gMaxSafeLocations
+
 var gLevel = {
   SIZE: 4,
   MINES: 2,
@@ -24,6 +31,8 @@ function onInit() {
   gGame.isOn = false
   gGame.shownCount = 0
   gGame.markedCount = 0
+  gHints = 3
+  gMaxSafeLocations = 3
   shownCount()
   markedCount()
   gLeftLives = gLevel.LIVES
@@ -35,7 +44,7 @@ function buildBoard() {
     board[i] = []
     for (var j = 0; j < gLevel.SIZE; j++) {
       board[i][j] = {
-        minesAroundCount: 0,
+        minesAroundCount: '',
         isShow: false,
         isMine: false,
         isMarked: false,
@@ -52,6 +61,7 @@ function buildBoard() {
 }
 
 function onCellClicked(elCell, i, j) {
+  if (hintIsOn) return
   if (gBoard[i][j].isMarked) return
   if (gBoard[i][j].isShow) return
   if (gLeftLives <= 0) return
@@ -78,7 +88,7 @@ function onCellClicked(elCell, i, j) {
       renderCell(newMineLocation, gBoard[i][j].minesAroundCount)
       updateMinesNegCount(gBoard)
     }
-    if (gBoard[i][j].minesAroundCount === 0) {
+    if (gBoard[i][j].minesAroundCount === '') {
       // console.log(`Cell (${i},${j}) is 0, expanding...`)
       expandUncover(gBoard, elCell, i, j)
     }
@@ -181,7 +191,7 @@ function putMinesOnRandEmptyLocations(board) {
 
 //לולאת שכנים לספירת מס המוקשים השכנים
 function setMinesNegsCount(pos, board) {
-  var neighs = 0
+  var neighs = ''
   for (var i = pos.i - 1; i <= pos.i + 1; i++) {
     if (i < 0 || i > board.length - 1) continue
     for (var j = pos.j - 1; j <= pos.j + 1; j++) {
@@ -240,6 +250,7 @@ function onRestart() {
   elLives.innerHTML = '🛟🛟🛟'
   var elSmiley = document.querySelector('.smiley')
   elSmiley.innerHTML = '😀'
+  resetHints()
   resetStopwatch()
   onInit()
 }
@@ -377,4 +388,118 @@ function markedCount() {
   }
   var elCell = document.querySelector('.numsgame .markedcount')
   elCell.innerHTML = gGame.markedCount
+}
+
+// לאפס כאשר ריסטרט
+
+//Bonuses!
+
+// וגם הוספתי פונקציה ברינדור - לא לשכוח
+function onHintClick(el) {
+  el.innerHTML = '💡'
+  hintIsOn = true
+  // expandUncover(gBoard, el, i, j)
+  // if ((el.innerHTML = '💡')) return
+}
+// להמשיך מכאן לעשות את הרמזים
+function onCellClickedHint(i, j) {
+  if (!hintIsOn || gHints === 0) return
+  if (hintIsOn) {
+    // console.log('i:', i)
+    // console.log('j:', j)
+    expandUncoverHint(gBoard, i, j)
+    gHints += -1
+  }
+  hintIsOn = false
+}
+
+function expandUncoverHint(board, i, j) {
+  var neighs = []
+  var pos = { i, j }
+  var originalContent = {}
+  for (var i = pos.i - 1; i <= pos.i + 1; i++) {
+    if (i < 0 || i > board.length - 1) continue
+    for (var j = pos.j - 1; j <= pos.j + 1; j++) {
+      if (j < 0 || j > board[0].length - 1) continue
+      // if ((pos.i === i) & (pos.j === j)) continue
+      neighs.push({ i, j })
+    }
+  }
+  // console.log('neighs:', neighs)
+  for (var i = 0; i < neighs.length; i++) {
+    var currNeigh = neighs[i]
+    board[currNeigh.i][currNeigh.j].isShow = true
+    var className = '.' + getClassName(currNeigh)
+    // console.log('className:', className)
+    var elCell = document.querySelector(className)
+    // console.log('elCell:', elCell)
+    console.log('className:', className)
+    originalContent[className] = elCell.innerHTML
+    console.log('originalContent[className]:', originalContent[className])
+    if (board[currNeigh.i][currNeigh.j].isMine) {
+      renderCell(currNeigh, MINE)
+    } else {
+      renderCell(currNeigh, board[currNeigh.i][currNeigh.j].minesAroundCount)
+    }
+    elCell.classList.add('clickedonhint')
+  }
+  setTimeout(() => {
+    for (var i = 0; i < neighs.length; i++) {
+      var currNeigh = neighs[i]
+      board[currNeigh.i][currNeigh.j].isShow = false
+      var className = '.' + getClassName(currNeigh)
+      // console.log('className:', className)
+      var elCell = document.querySelector(className)
+      // console.log('elCell:', elCell)
+
+      elCell.innerHTML = originalContent[className]
+
+      elCell.classList.remove('clickedonhint')
+    }
+  }, 1500)
+}
+
+function resetHints() {
+  var elHints = document.querySelectorAll('.hints')
+  for (var i = 0; i < elHints.length; i++) {
+    var currHint = elHints[i]
+    currHint.innerHTML = '🔦'
+  }
+}
+
+function safeClick() {
+  if (!gGame.isOn) return
+  for (let i = 0; i < gBoard.length; i++) {
+    for (let j = 0; j < gBoard[i].length; j++) {
+      var currCell = gBoard[i][j]
+      if (currCell.isMine || currCell.isShow || currCell.isMarked) continue
+      gSafeLocations.push({ i, j })
+    }
+  }
+  var randIdx = getRandomIntInclusive(0, gSafeLocations.length - 1)
+  var randCell = gSafeLocations[randIdx]
+  console.log('randCell:', randCell)
+  gBoard[randCell.i][randCell.j].isShow = true
+  renderCell(randCell, gBoard[randCell.i][randCell.j].minesAroundCount)
+  var className = '.' + getClassName(randCell)
+  var elCell = document.querySelector(className)
+  elCell.classList.add('clickedonsafeclick')
+  setInterval(() => {
+    gBoard[randCell.i][randCell.j].isShow = false
+    renderCell(randCell, gBoard[randCell.i][randCell.j].minesAroundCount)
+    var className = '.' + getClassName(randCell)
+    var elCell = document.querySelector(className)
+    elCell.classList.remove('clickedonsafeclick')
+  }, 1500)
+  // delete the {i,j} you chose before
+  gSafeLocations.splice(randIdx, 1)
+  gMaxSafeLocations--
+  var elClicksAvailable = document.querySelector('.safeclicktext span')
+  console.log(elClicksAvailable)
+  elClicksAvailable.innerHTML = gMaxSafeLocations
+}
+
+function onSafeClick() {
+  if (gMaxSafeLocations === 0) return
+  safeClick()
 }

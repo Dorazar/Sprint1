@@ -72,3 +72,40 @@ footer {
 .lives span {
   font-size: 20px;
 }
+
+.hints {
+  cursor: pointer; /* מצביע עכבר */
+}
+
+.cell.clickedonhint {
+  color: black;
+  border: 2px solid yellow;
+  background-color: rgb(202, 202, 202);
+  box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.2), -4px -4px 6px rgba(255, 255, 255, 0.7);
+}
+
+.cell.clickedonsafeclick {
+  color: black;
+  border: 2px solid rgb(16, 165, 252);
+  background-color: rgb(202, 202, 202);
+  box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.2), -4px -4px 6px rgba(255, 255, 255, 0.7);
+}
+
+.hintsbuttons {
+  margin-bottom: 15px;
+}
+
+.safeclicktext {
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+.safeclick span.islandicon {
+  font-size: 20px;
+}
+
+.safeclick {
+  padding-bottom: 3px;
+  border: 10px;
+  cursor: pointer; /* מצביע עכבר */
+}

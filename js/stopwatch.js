@@ -7,6 +7,8 @@ function stopStopwatch() {
   var elWinTime = document.querySelector('.numsgame .timer').innerHTML
   document.querySelector('.numsgame .timer').innerHTML = elWinTime
   console.log('elWinTime:', elWinTime)
+  document.querySelector('.numsgame .timer').innerHTML = localStorage.Begginer
+  console.log('localStorage.Begginer:', localStorage.Begginer)
   clearInterval(gTimerInterval)
 }
 
