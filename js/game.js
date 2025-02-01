@@ -15,6 +15,7 @@ var gTimerInterval
 // hints
 var gHints
 var hintIsOn = false
+var gExterminator
 
 var gSafeLocations = []
 var gMaxSafeLocations
@@ -35,6 +36,7 @@ function onInit() {
   gGame.markedCount = 0
   gHints = 3
   gMaxSafeLocations = 3
+  gExterminator = 1
   shownCount()
   markedCount()
   minesOnStart()
@@ -76,6 +78,7 @@ function onCellClicked(elCell, i, j) {
     startStopwatch()
     putMinesOnRandEmptyLocations(gBoard)
     updateMinesNegCount(gBoard)
+
     // if (gBoard[i][j].minesAroundCount === 0) {
     //   console.log(elCell)
     // }
@@ -569,9 +572,42 @@ function countMines() {
     }
   }
   var elMine = document.querySelector('.minescount')
-  elMine.innerHTML = countMines++
+  elMine.innerHTML = countMines
 }
 
-function getMineLocation() {}
+// לבדוק מכאן על mine exterminator
 
-function mineExterminator() {}
+function getMineLocation() {
+  if (gLevel.SIZE >= 12) {
+  }
+  var minesLocations = []
+  for (var i = 0; i < gBoard.length; i++) {
+    for (var j = 0; j < gBoard[i].length; j++) {
+      if (gBoard[i][j].isMine & !gBoard[i][j].isMarked) {
+        minesLocations.push({ i, j })
+      }
+    }
+  }
+  return minesLocations
+}
+function onMineExterminator() {
+  if (!gGame.isOn || gExterminator === 0) return
+  var minesLocations = getMineLocation()
+  var randIdx = getRandomIntInclusive(0, minesLocations.length)
+
+  for (var i = 0; i < 3; i++) {
+    var randIdx = getRandomIntInclusive(0, minesLocations.length - 1)
+    var currMine = minesLocations[randIdx]
+    console.log(currMine)
+    //update the model
+    gBoard[currMine.i][currMine.j].isMine = false
+    //update the dom
+    renderCell(currMine, '')
+    minesLocations.splice(randIdx, 1)
+  }
+  gExterminator--
+  countMines()
+  updateMinesNegCount(gBoard)
+  var elMinexterminator = document.querySelector('.safeclick.mineexterminator span')
+  elMinexterminator.innerHTML = gExterminator
+}

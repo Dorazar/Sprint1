@@ -119,6 +119,7 @@ footer {
 .safeclicktext {
   font-size: 8px;
   margin-top: 5px;
+  margin-left: 170px;
 }
 
 .safeclick span.islandicon {
@@ -130,7 +131,8 @@ footer {
   padding: 5px;
   cursor: pointer;
   border-radius: 5px;
-  border-color: black;
+  border-color: transparent;
+  margin-right: 50px;
 }
 
 .lightmode {
@@ -194,4 +196,28 @@ button:hover {
   font-size: 16px;
   border: 2px solid white;
   text-align: center;
+}
+
+.safeclick.mineexterminator {
+  margin-left: -160px;
+  margin-top: -31px;
+}
+
+.mineexterminatorjpg {
+  width: 100px;
+  height: auto;
+  image-rendering: crisp-edges; /* שומר על שקיפות וניקיון */
+  background-color: transparent;
+}
+.mineexterminatorjpg:hover {
+  background-color: transparent;
+}
+
+img {
+  border: none;
+  outline: none;
+  margin-left: 10px;
+  width: 100px;
+  height: auto;
+  image-rendering: pixelated; /* שומר על שקיפות וניקיון */
 }
