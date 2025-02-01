@@ -7,6 +7,8 @@ const LIVES = '🛟'
 var gEmptyCells
 var gLeftLives
 
+var gCellRecursion = []
+
 var gStartTime
 var gTimerInterval
 
@@ -35,6 +37,7 @@ function onInit() {
   gMaxSafeLocations = 3
   shownCount()
   markedCount()
+  minesOnStart()
   gLeftLives = gLevel.LIVES
 }
 
@@ -88,10 +91,10 @@ function onCellClicked(elCell, i, j) {
       renderCell(newMineLocation, gBoard[i][j].minesAroundCount)
       updateMinesNegCount(gBoard)
     }
-    if (gBoard[i][j].minesAroundCount === '') {
-      // console.log(`Cell (${i},${j}) is 0, expanding...`)
-      expandUncover(gBoard, elCell, i, j)
-    }
+    // if (gBoard[i][j].minesAroundCount === '') {
+    //   // console.log(`Cell (${i},${j}) is 0, expanding...`)
+    //   expandUncover(gBoard, elCell, i, j)
+    // }
 
     renderCell({ i, j }, gBoard[i][j].minesAroundCount)
     updateMinesNegCount(gBoard)
@@ -99,6 +102,10 @@ function onCellClicked(elCell, i, j) {
   }
 
   if (gGame.isOn & !gBoard[i][j].isMine) {
+    if (gBoard[i][j].minesAroundCount === '') {
+      // console.log(`Cell (${i},${j}) is 0, expanding...`)
+      expandUncover(gBoard, elCell, i, j)
+    }
     // elCell.innerHTML = gBoard[i][j].minesAroundCount
     // elCell.style.color = 'black'
     elCell.classList.add('clicked')
@@ -132,6 +139,7 @@ function onCellClicked(elCell, i, j) {
     // gameOver()
   }
 
+  countMines()
   shownCount()
   //check if victory after the press
   isVictory()
@@ -139,6 +147,7 @@ function onCellClicked(elCell, i, j) {
 
 function expandUncover(board, elCell, i, j) {
   var neighs = []
+  var neighsrecursion = []
   var pos = { i, j }
   for (var i = pos.i - 1; i <= pos.i + 1; i++) {
     if (i < 0 || i > board.length - 1) continue
@@ -148,16 +157,26 @@ function expandUncover(board, elCell, i, j) {
       neighs.push({ i, j })
     }
   }
-  // console.log('neighs:', neighs)
   for (var i = 0; i < neighs.length; i++) {
     var currNeigh = neighs[i]
+    // recursion
+    if (board[currNeigh.i][currNeigh.j].isShow) continue
     board[currNeigh.i][currNeigh.j].isShow = true
     var className = '.' + getClassName(currNeigh)
     // console.log('className:', className)
-    var elCell = document.querySelector(className)
+    elCell = document.querySelector(className)
     // console.log('elCell:', elCell)
     renderCell(currNeigh, board[currNeigh.i][currNeigh.j].minesAroundCount)
     elCell.classList.add('clicked')
+
+    if (board[currNeigh.i][currNeigh.j].minesAroundCount === '') {
+      neighsrecursion.push(currNeigh)
+    }
+
+    for (let k = 0; k < neighsrecursion.length; k++) {
+      var currCell = neighsrecursion[k]
+      expandUncover(board, elCell, currCell.i, currCell.j)
+    }
   }
 }
 
@@ -319,8 +338,12 @@ function onCellMarked(ev) {
     // console.log('cellIdx.i:', cellIdx.i)
     // console.log('cellIdx.j:', cellIdx.j)
     markedCount()
+    countMines()
   }
+  isVictory()
 }
+
+// לתקן מספר מוקשים
 
 function onDiffchose(elBtn) {
   console.log('elBtn.innerHTML:', elBtn.innerHTML)
@@ -391,13 +414,15 @@ function markedCount() {
   var elCell = document.querySelector('.numsgame .markedcount')
   elCell.innerHTML = gGame.markedCount
 }
-
 // לאפס כאשר ריסטרט
 
 //Bonuses!
 
+//bonus: hints
+
 // וגם הוספתי פונקציה ברינדור - לא לשכוח
 function onHintClick(el) {
+  if (!gGame.isOn) return
   el.innerHTML = '💡'
   hintIsOn = true
   // expandUncover(gBoard, el, i, j)
@@ -405,7 +430,7 @@ function onHintClick(el) {
 }
 // להמשיך מכאן לעשות את הרמזים
 function onCellClickedHint(i, j) {
-  if (!hintIsOn || gHints === 0) return
+  if (!hintIsOn || gHints === 0 || gBoard[i][j].isShow) return
   if (hintIsOn) {
     // console.log('i:', i)
     // console.log('j:', j)
@@ -423,7 +448,9 @@ function expandUncoverHint(board, i, j) {
     if (i < 0 || i > board.length - 1) continue
     for (var j = pos.j - 1; j <= pos.j + 1; j++) {
       if (j < 0 || j > board[0].length - 1) continue
+      if (board[i][j].isShow) continue
       // if ((pos.i === i) & (pos.j === j)) continue
+
       neighs.push({ i, j })
     }
   }
@@ -455,10 +482,10 @@ function expandUncoverHint(board, i, j) {
       // console.log('elCell:', elCell)
 
       elCell.innerHTML = originalContent[className]
-
+      renderCell(currNeigh, originalContent[className])
       elCell.classList.remove('clickedonhint')
     }
-  }, 1500)
+  }, 1000)
 }
 
 function resetHints() {
@@ -468,6 +495,8 @@ function resetHints() {
     currHint.innerHTML = '🔦'
   }
 }
+
+//bonus: safeClick
 
 function safeClick() {
   if (!gGame.isOn) return
@@ -505,3 +534,44 @@ function onSafeClick() {
   if (gMaxSafeLocations === 0) return
   safeClick()
 }
+
+// bonus:light mode
+
+function onLightMode() {
+  var elBody = document.body
+  var elBtn = document.querySelector('.lightmode')
+
+  // console.log(elBtn)
+
+  elBody.classList.toggle('lightmodebackground')
+
+  if (elBody.classList.contains('lightmodebackground')) {
+    elBtn.innerText = '🌙 Dark Mode'
+  } else {
+    elBtn.innerText = '☀️ Light Mode'
+  }
+}
+
+//bonus:mine exterminator
+
+function minesOnStart() {
+  var elMine = document.querySelector('.minescount')
+  elMine.innerHTML = gLevel.MINES
+}
+
+function countMines() {
+  var countMines = 0
+  for (var i = 0; i < gBoard.length; i++) {
+    for (var j = 0; j < gBoard[i].length; j++) {
+      if (gBoard[i][j].isMine & !gBoard[i][j].isMarked) {
+        countMines++
+      }
+    }
+  }
+  var elMine = document.querySelector('.minescount')
+  elMine.innerHTML = countMines++
+}
+
+function getMineLocation() {}
+
+function mineExterminator() {}
