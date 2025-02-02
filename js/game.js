@@ -274,6 +274,7 @@ function onRestart() {
   elLives.innerHTML = '🛟🛟🛟'
   var elSmiley = document.querySelector('.smiley')
   elSmiley.innerHTML = '😀'
+  gExterminator = 1
   resetHints()
   resetStopwatch()
   onInit()

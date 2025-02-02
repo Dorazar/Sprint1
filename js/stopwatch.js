@@ -1,5 +1,9 @@
 'use strict'
 
+var gBeginner = []
+var gMedium = []
+var gExpert = []
+
 function startStopwatch() {
   gStartTime = Date.now()
   gTimerInterval = setInterval(updateStopwatch, 10)
@@ -12,12 +16,13 @@ function stopStopwatch() {
   console.log('elWinTime:', elWinTime)
   clearInterval(gTimerInterval)
   if (gLeftLives === 0) return // if game over it will not count
-  score(elWinTime, gLevel.SIZE)
+  // score(elWinTime, gLevel.SIZE)
+  saveTime(elWinTime, gLevel.SIZE)
 }
 
 function resetStopwatch() {
   clearInterval(gTimerInterval)
-  document.querySelector('.timer').textContent = '00:00:00'
+  document.querySelector('.timer').textContent = '00'
 }
 
 function updateStopwatch() {
@@ -31,26 +36,48 @@ function updateStopwatch() {
   const milliseconds = Math.floor((elapsedTime % 1000) / 10)
     .toString()
     .padStart(2, '0')
-  document.querySelector('.timer').textContent = `${minutes}:${seconds}:${milliseconds}`
+  document.querySelector('.timer').textContent = `${seconds}`
 }
 
-// לא שומר את השיא האחרון נכון, פשוט דורס את הקיים..
-
-function score(time, size) {
+function saveTime(time, size) {
   var size = gLevel.SIZE
-  localStorage.stopper = time
-
+  var difficult
+  var min
   switch (size) {
     case 4:
-      document.querySelector('.scores .beginner').innerHTML = localStorage.stopper
+      difficult = 'Beginner'
+      if (!gBeginner.includes(+time)) {
+        gBeginner.push(+time)
+      }
+      min = Math.min(...gBeginner)
+      localStorage.difficult = min
+      document.querySelector('.scores .beginner').innerHTML = localStorage.difficult
       break
     case 8:
-      document.querySelector('.scores .medium').innerHTML = localStorage.stopper
+      difficult = 'Medium'
+      gMedium.push(+time)
+      if (!gMedium.includes(+time)) {
+        gMedium.push(+time)
+        document.querySelector('.scores .medium').innerHTML = localStorage.difficult
+      }
+      min = Math.min(...gMedium)
+      localStorage.difficult = min
       break
     case 12:
-      document.querySelector('.scores .expert').innerHTML = localStorage.stopper
+      difficult = 'Expert'
+      gExpert.push(+time)
+      if (!gExpert.includes(+time)) {
+        gExpert.push(+time)
+      }
+      min = Math.min(...gExpert)
+      localStorage.difficult = min
+      document.querySelector('.scores .expert').innerHTML = localStorage.difficult
       break
     default:
       break
   }
+
+  console.log('gBeginner:', gBeginner, `min:`, min)
+  console.log('gMedium:', gMedium)
+  console.log('gExpert:', gExpert)
 }
