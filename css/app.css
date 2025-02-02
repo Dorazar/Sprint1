@@ -1,9 +1,18 @@
 body {
-  background-color: black;
+  background-image: url('../jpg/minesweeper1.png');
   text-align: center;
   color: lightgray;
   font-family: 'Comic Neue', sans-serif;
-  font-size: 18px; /* טקסט בסיסי גדול יותר */
+  font-size: 20px; /* טקסט בסיסי גדול יותר */
+  font-weight: 700;
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: 100vh; /* 100% מגובה הדפדפן */
+}
+
+h1 {
+  font-weight: bold; /* הופך את הכותרת לעבה יותר */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6); /* מוסיף צל לכותרת */
 }
 
 table {
@@ -49,6 +58,7 @@ table {
   cursor: pointer;
   padding: 5px;
   transition: transform 0.2s;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .restart .smiley:active {
@@ -136,9 +146,9 @@ footer {
 }
 
 .lightmode {
-  position: fixed;
-  top: 10px;
-  left: 10px;
+  position: fixed; /* מיקום קבוע בדפדפן */
+  top: 20px; /* מרחק מהחלק העליון */
+  left: 20px; /* מרחק מהחלק השמאלי */
   font-size: 14px;
   padding: 8px 10px;
   background-color: white;
@@ -155,7 +165,11 @@ footer {
 }
 
 .lightmodebackground {
-  background-color: grey;
+  color: purple;
+  background-image: url('../jpg/minesweeper2.png');
+  /* background-color: grey; */
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 button {
@@ -225,4 +239,9 @@ img {
 .safeclickbtn {
   border: 2px solid black;
   border-radius: 5px;
+}
+
+.safeclickbtn:hover {
+  background-color: black;
+  color: white;
 }
