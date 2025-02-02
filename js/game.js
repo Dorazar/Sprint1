@@ -275,6 +275,8 @@ function onRestart() {
   var elSmiley = document.querySelector('.smiley')
   elSmiley.innerHTML = '😀'
   gExterminator = 1
+  var elMinexterminator = document.querySelector('.safeclick.mineexterminator span')
+  elMinexterminator.innerHTML = gExterminator
   resetHints()
   resetStopwatch()
   onInit()

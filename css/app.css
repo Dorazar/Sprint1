@@ -132,7 +132,7 @@ footer {
   cursor: pointer;
   border-radius: 5px;
   border-color: transparent;
-  margin-right: 50px;
+  margin-right: 33px;
 }
 
 .lightmode {
@@ -199,7 +199,7 @@ button:hover {
 }
 
 .safeclick.mineexterminator {
-  margin-left: -160px;
+  margin-left: -120px;
   margin-top: -31px;
 }
 
@@ -220,4 +220,9 @@ img {
   width: 100px;
   height: auto;
   image-rendering: pixelated; /* שומר על שקיפות וניקיון */
+}
+
+.safeclickbtn {
+  border: 2px solid black;
+  border-radius: 5px;
 }
