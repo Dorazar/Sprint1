@@ -6,7 +6,7 @@ const LIVES = '🛟'
 
 var gEmptyCells
 var gLeftLives
-
+var gfindSafeClickCells
 var gCellRecursion = []
 
 var gStartTime
@@ -17,7 +17,7 @@ var gHints
 var hintIsOn = false
 var gExterminator
 
-var gSafeLocations = []
+var gSafeLocations
 var gMaxSafeLocations
 
 var gLevel = {
@@ -505,6 +505,7 @@ function resetHints() {
 //bonus: safeClick
 
 function safeClick() {
+  gSafeLocations = []
   if (!gGame.isOn) return
   for (let i = 0; i < gBoard.length; i++) {
     for (let j = 0; j < gBoard[i].length; j++) {
@@ -513,6 +514,8 @@ function safeClick() {
       gSafeLocations.push({ i, j })
     }
   }
+  if (gSafeLocations.length === 0) return
+  console.log(gSafeLocations)
   var randIdx = getRandomIntInclusive(0, gSafeLocations.length - 1)
   var randCell = gSafeLocations[randIdx]
   console.log('randCell:', randCell)
@@ -521,7 +524,7 @@ function safeClick() {
   var className = '.' + getClassName(randCell)
   var elCell = document.querySelector(className)
   elCell.classList.add('clickedonsafeclick')
-  setInterval(() => {
+  setTimeout(() => {
     gBoard[randCell.i][randCell.j].isShow = false
     renderCell(randCell, gBoard[randCell.i][randCell.j].minesAroundCount)
     var className = '.' + getClassName(randCell)
