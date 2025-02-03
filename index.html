@@ -38,13 +38,60 @@
   </div>
   <div class="board-container"></div>
 
-  <div class="hintsbuttons">
-    <button class ="safeclick mineexterminatorjpg" onclick="onMineExterminator()" ><img src="jpg/mine_exterdinator-removebg-preview.png" alt=""></button>
+
+
+
+
+  <!-- <div class="hintsbuttons"> -->
+    <!-- <button class="megahint" onclick="onMegaHintBtn()">Mega Hint</button> -->
+    <!-- <button class ="safeclick mineexterminatorjpg" onclick="onMineExterminator()" ><img src="jpg/mine_exterdinator-removebg-preview.png" alt=""></button> -->
     
-    <button class="safeclickbtn" onclick="onSafeClick()">Safe Click <span class="islandicon">🏝️</span></button>
-    <div class="safeclick safeclicktext"><span>3</span> clicks available</div>
-    <div class="safeclick mineexterminator"><span>1</span> click available</div>
+    <!-- <button class="safeclickbtn" onclick="onSafeClick()">Safe Click <span class="islandicon">🏝️</span></button> -->
+    <!-- <div class="safeclick safeclicktext"><span>3</span> clicks available</div> -->
+    <!-- <div class="safeclick mineexterminator"><span>1</span> click available</div> -->
+    <!-- <div class="safeclick megahint"><span>1</span> click available</div> -->
+  <!-- </div> -->
+
+
+
+  <div class="hintsbuttons">
+  
+    <div class="hint-container">
+      <button class="megahint" onclick="onMegaHintBtn()">Mega Hint</button>
+      <span>1</span>click available<!-- מידע שיוצג מתחת לכפתור -->
+    </div>
+
+    <div class="mineexterminator-container">
+      <button class ="mineexterminator" onclick="onMineExterminator()" ><img src="jpg/mine_exterdinator-removebg-preview.png" alt=""></button>
+      <span>1</span>click available <!-- מידע שיוצג מתחת לכפתור -->
+    </div>
+  
+    <div class="safeclick-container">
+      <button class="safeclick" onclick="onSafeClick()">Safe Click 🏝️</button>
+      <span class="clicks">3</span> clicks available <!-- מידע שיוצג מתחת לכפתור -->
+    </div>
+  
+
+  
   </div>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <div class="scores">Best Scores:
   <table>

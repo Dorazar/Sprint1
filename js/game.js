@@ -16,7 +16,10 @@ var gTimerInterval
 var gHints
 var hintIsOn = false
 var gExterminator
-
+//hints: mega hint
+var gMegaHintLocations = []
+var gMaxMegaHint
+var megaHintIsOn = false
 var gSafeLocations
 var gMaxSafeLocations
 
@@ -37,6 +40,7 @@ function onInit() {
   gHints = 3
   gMaxSafeLocations = 3
   gExterminator = 1
+  gMaxMegaHint = 1
   shownCount()
   markedCount()
   minesOnStart()
@@ -60,6 +64,7 @@ function buildBoard() {
 }
 
 function onCellClicked(elCell, i, j) {
+  if (megaHintIsOn) return
   if (hintIsOn) return
   if (gBoard[i][j].isMarked) return
   if (gBoard[i][j].isShow) return
@@ -261,16 +266,21 @@ function lives(num) {
 }
 
 function onRestart() {
-  var elSafeClickText = document.querySelector('.safeclicktext span')
+  var elSafeClickText = document.querySelector('.safeclick-container .clicks')
   elSafeClickText.innerHTML = 3
   gLevel.LIVES = 3
   var elLives = document.querySelector('.lives span')
   elLives.innerHTML = '🛟🛟🛟'
   var elSmiley = document.querySelector('.smiley')
   elSmiley.innerHTML = '😀'
+  var elMegaHintCounr = document.querySelector('.hint-container span')
+  elMegaHintCounr.innerHTML = gMaxMegaHint
   gExterminator = 1
-  var elMinexterminator = document.querySelector('.safeclick.mineexterminator span')
+  gMaxMegaHint = 1
+  var elMinexterminator = document.querySelector('.mineexterminator-container span')
   elMinexterminator.innerHTML = gExterminator
+  gMegaHintLocations = []
+  megaHintIsOn = false
   resetHints()
   resetStopwatch()
   onInit()
@@ -525,7 +535,7 @@ function safeClick() {
   // delete the {i,j} you chose before
   gSafeLocations.splice(randIdx, 1)
   gMaxSafeLocations--
-  var elClicksAvailable = document.querySelector('.safeclicktext span')
+  var elClicksAvailable = document.querySelector('.safeclick-container .clicks')
   // console.log(elClicksAvailable)
   elClicksAvailable.innerHTML = gMaxSafeLocations
 }
@@ -605,6 +615,82 @@ function onMineExterminator() {
   gExterminator--
   countMines()
   updateMinesNegCount(gBoard)
-  var elMinexterminator = document.querySelector('.safeclick.mineexterminator span')
+  var elMinexterminator = document.querySelector('.mineexterminator-container span')
   elMinexterminator.innerHTML = gExterminator
+}
+
+//MegaHint
+
+function megaHint(elCell, i, j) {
+  if (!megaHintIsOn) return
+
+  var cellsToExpose = []
+
+  if (gMegaHintLocations.length < 2) {
+    gMegaHintLocations.push({ i, j })
+  }
+
+  if (gMegaHintLocations.length === 2) {
+    var startLoc = gMegaHintLocations[0]
+    var endLoc = gMegaHintLocations[1]
+    console.log('startLoc:', startLoc)
+    console.log('endLoc:', endLoc)
+    if (startLoc.i > endLoc.i) {
+      console.log('hi')
+      gMegaHintLocations = []
+      return
+    }
+
+    for (var i = startLoc.i; i < endLoc.i + 1; i++) {
+      for (var j = startLoc.j; j < endLoc.j + 1; j++) {
+        cellsToExpose.push({ i, j })
+      }
+    }
+    expandUncoverMegaHint(cellsToExpose)
+  }
+}
+
+function expandUncoverMegaHint(cellsToExpose) {
+  var originalContent = {}
+  for (var i = 0; i < cellsToExpose.length; i++) {
+    var currCell = cellsToExpose[i]
+    gBoard[currCell.i][currCell.j].isShow = true
+    var className = '.' + getClassName(currCell)
+    // console.log('className:', className)
+    var elCell = document.querySelector(className)
+    // console.log('elCell:', elCell)
+    console.log('className:', className)
+    originalContent[className] = elCell.innerHTML
+    console.log('originalContent[className]:', originalContent[className])
+    if (gBoard[currCell.i][currCell.j].isMine) {
+      renderCell(currCell, MINE)
+    } else {
+      renderCell(currCell, gBoard[currCell.i][currCell.j].minesAroundCount)
+    }
+    elCell.classList.add('clickedonhint')
+  }
+
+  setTimeout(() => {
+    for (var i = 0; i < cellsToExpose.length; i++) {
+      var currCell = cellsToExpose[i]
+      gBoard[currCell.i][currCell.j].isShow = false
+      var className = '.' + getClassName(currCell)
+      // console.log('className:', className)
+      var elCell = document.querySelector(className)
+      // console.log('elCell:', elCell)
+
+      elCell.innerHTML = originalContent[className]
+      renderCell(currCell, originalContent[className])
+      elCell.classList.remove('clickedonhint')
+    }
+  }, 2000)
+  gMaxMegaHint--
+  megaHintIsOn = false
+  var elMegaHintCounr = document.querySelector('.hint-container span')
+  elMegaHintCounr.innerHTML = gMaxMegaHint
+}
+
+function onMegaHintBtn() {
+  if (!gGame.isOn || gMaxMegaHint === 0) return
+  megaHintIsOn = true
 }

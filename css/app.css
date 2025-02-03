@@ -132,17 +132,16 @@ footer {
   margin-left: 170px;
 }
 
-.safeclick span.islandicon {
-  font-size: 24px;
-}
-
 .safeclick {
   font-size: 18px;
-  padding: 5px;
+  margin: 10px;
+  padding: 8px 12px;
   cursor: pointer;
+  background-color: white;
+  color: black;
   border-radius: 5px;
-  border-color: transparent;
-  margin-right: 33px;
+  border: 2px solid black;
+  transition: 0.3s;
 }
 
 .lightmode {
@@ -217,12 +216,6 @@ button:hover {
   margin-top: -31px;
 }
 
-.mineexterminatorjpg {
-  width: 100px;
-  height: auto;
-  image-rendering: crisp-edges; /* שומר על שקיפות וניקיון */
-  background-color: transparent;
-}
 .mineexterminatorjpg:hover {
   background-color: transparent;
 }
@@ -242,6 +235,48 @@ img {
 }
 
 .safeclickbtn:hover {
+  background-color: black;
+  color: white;
+}
+
+.hint-container,
+.safeclick-container,
+.mineexterminator-container {
+  display: inline-block; /* מאפשר לכל כפתור להחזיק את הטקסט שמתחתיו */
+  text-align: center; /* ממרכז את הטקסט מתחת לכפתור */
+  margin: 0 15px; /* רווח ביניהם */
+}
+
+.hint-container span,
+.safeclick-container span,
+.mineexterminator-container span {
+  display: block; /* גורם לטקסט להופיע מתחת לכפתור */
+  margin-top: 5px; /* רווח קטן בין הכפתור לטקסט */
+}
+
+button.mineexterminator {
+  background-color: transparent;
+  border: none;
+}
+
+button.megahint {
+  font-size: 18px;
+  margin: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: white;
+  color: black;
+  border-radius: 5px;
+  border: 2px solid black;
+  transition: 0.3s;
+}
+
+button.megahint:hover {
+  background-color: black;
+  color: white;
+}
+
+.safeclick:hover {
   background-color: black;
   color: white;
 }
