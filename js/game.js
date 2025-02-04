@@ -20,6 +20,7 @@ var gExterminator
 var gMegaHintLocations = []
 var gMaxMegaHint
 var megaHintIsOn = false
+
 var gSafeLocations
 var gMaxSafeLocations
 
@@ -273,10 +274,10 @@ function onRestart() {
   elLives.innerHTML = '🛟🛟🛟'
   var elSmiley = document.querySelector('.smiley')
   elSmiley.innerHTML = '😀'
+  gMaxMegaHint = 1
   var elMegaHintCounr = document.querySelector('.hint-container span')
   elMegaHintCounr.innerHTML = gMaxMegaHint
   gExterminator = 1
-  gMaxMegaHint = 1
   var elMinexterminator = document.querySelector('.mineexterminator-container span')
   elMinexterminator.innerHTML = gExterminator
   gMegaHintLocations = []
