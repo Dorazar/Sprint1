@@ -272,6 +272,7 @@ function onRestart() {
   gLevel.LIVES = 3
   var elLives = document.querySelector('.lives span')
   elLives.innerHTML = '🛟🛟🛟'
+
   var elSmiley = document.querySelector('.smiley')
   elSmiley.innerHTML = '😀'
   gMaxMegaHint = 1
@@ -613,13 +614,22 @@ function onMineExterminator() {
     renderCell(currMine, '')
     minesLocations.splice(randIdx, 1)
   }
+
   gExterminator--
   countMines()
   updateMinesNegCount(gBoard)
+  updateBoardNumsAfterExterminator(gBoard)
   var elMinexterminator = document.querySelector('.mineexterminator-container span')
   elMinexterminator.innerHTML = gExterminator
 }
 
+function updateBoardNumsAfterExterminator(gBoard) {
+  for (var i = 0; i < gBoard.length; i++) {
+    for (var j = 0; j < gBoard[i].length; j++) {
+      if (gBoard[i][j].isShow) renderCell({ i, j }, gBoard[i][j].minesAroundCount)
+    }
+  }
+}
 //MegaHint
 
 function megaHint(elCell, i, j) {
