@@ -241,7 +241,8 @@ img {
 
 .hint-container,
 .safeclick-container,
-.mineexterminator-container {
+.mineexterminator-container,
+.undo-container {
   display: inline-block; /* מאפשר לכל כפתור להחזיק את הטקסט שמתחתיו */
   text-align: center; /* ממרכז את הטקסט מתחת לכפתור */
   margin: 0 15px; /* רווח ביניהם */
@@ -249,7 +250,8 @@ img {
 
 .hint-container span,
 .safeclick-container span,
-.mineexterminator-container span {
+.mineexterminator-container span,
+.undo-container span {
   display: block; /* גורם לטקסט להופיע מתחת לכפתור */
   margin-top: 5px; /* רווח קטן בין הכפתור לטקסט */
 }
@@ -277,6 +279,23 @@ button.megahint:hover {
 }
 
 .safeclick:hover {
+  background-color: black;
+  color: white;
+}
+
+button.undo {
+  font-size: 18px;
+  margin: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: white;
+  color: black;
+  border-radius: 5px;
+  border: 2px solid black;
+  transition: 0.3s;
+}
+
+button.undo:hover {
   background-color: black;
   color: white;
 }
