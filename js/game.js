@@ -119,6 +119,7 @@ function onCellClicked(elCell, i, j) {
   }
 
   if (gGame.isOn & gBoard[i][j].isMine) {
+    saveUndoLocations(i, j)
     console.log('press on mine!')
     elCell.classList.add('clicked')
     elCell.classList.add('mine')
@@ -272,13 +273,33 @@ function lives(num) {
   }
 }
 
+function updateLivesUndo(gLeftLives) {
+  var elLives = document.querySelector('.lives span')
+  switch (gLeftLives) {
+    case 3:
+      elLives.innerHTML = '🛟🛟🛟'
+      break
+    case 2:
+      elLives.innerHTML = '🛟🛟'
+      break
+    case 1:
+      elLives.innerHTML = '🛟'
+      break
+    case 0:
+      elLives.innerHTML = '☠️'
+      markAllmines()
+      break
+    default:
+      break
+  }
+}
+
 function onRestart() {
   var elSafeClickText = document.querySelector('.safeclick-container .clicks')
   elSafeClickText.innerHTML = 3
   gLevel.LIVES = 3
   var elLives = document.querySelector('.lives span')
   elLives.innerHTML = '🛟🛟🛟'
-
   var elSmiley = document.querySelector('.smiley')
   elSmiley.innerHTML = '😀'
   gMaxMegaHint = 1
@@ -732,6 +753,12 @@ function onUndoClick() {
     var currLocation = gUndoLocations[i]
     //model
     gBoard[currLocation.i][currLocation.j].isShow = false
+    //render
+    if (gBoard[currLocation.i][currLocation.j].isMine) {
+      gLeftLives++
+      updateLivesUndo(gLeftLives)
+      console.log('gLeftLives:', gLeftLives)
+    }
     var elCell = document.querySelector('.' + getClassName(currLocation))
     elCell.classList.remove('clicked')
   }
@@ -739,4 +766,6 @@ function onUndoClick() {
   var elMaxUndo = document.querySelector('.undo-container .clicks')
   elMaxUndo.innerHTML = gMaxUndo
   gUndoLocations = []
+
+  shownCount()
 }
