@@ -28,6 +28,11 @@ var gMaxUndo
 var gSafeLocations
 var gMaxSafeLocations
 
+//smartphone touch
+
+var pressTimer
+var gPressIsOn = false
+
 var gLevel = {
   SIZE: 4,
   MINES: 2,
@@ -40,6 +45,7 @@ function onInit() {
   gBoard = buildBoard()
   renderBoard(gBoard, '.board-container')
   gGame.isOn = false
+  gPressIsOn = false
   gGame.shownCount = 0
   gGame.markedCount = 0
   gHints = 3
@@ -52,6 +58,7 @@ function onInit() {
   markedCount()
   minesOnStart()
   gLeftLives = gLevel.LIVES
+  gPressIsOn = false
 }
 
 function buildBoard() {
@@ -74,7 +81,13 @@ function onCellClicked(elCell, i, j) {
   gUndoLocations = []
   if (megaHintIsOn) return
   if (hintIsOn) return
-  if (gBoard[i][j].isMarked) return
+  if (gBoard[i][j].isMarked) {
+    gBoard[i][j].isMarked = false
+    renderCell({ i, j }, '')
+    markedCount()
+    countMines()
+    return
+  }
   if (gBoard[i][j].isShow) return
   if (gLeftLives <= 0) return
 
@@ -167,6 +180,8 @@ function expandUncover(board, elCell, i, j) {
     var currNeigh = neighs[i]
     // recursion
     if (board[currNeigh.i][currNeigh.j].isShow) continue
+    // to prevent the situation of: if the cell marked, it sholud not show by the neighs open
+    if (board[currNeigh.i][currNeigh.j].isMarked) continue
     board[currNeigh.i][currNeigh.j].isShow = true
     var className = '.' + getClassName(currNeigh)
     // console.log('className:', className)
@@ -190,7 +205,7 @@ function expandUncover(board, elCell, i, j) {
   }
 }
 
-/// === random algorithem to find empty cell for mine ====
+//random algorithem to find empty cell for mine
 
 function findEmptyCell(board) {
   gEmptyCells = []
@@ -218,7 +233,7 @@ function putMinesOnRandEmptyLocations(board) {
 }
 // ==================================================== //
 
-//לולאת שכנים לספירת מס המוקשים השכנים
+// count the neighs
 function setMinesNegsCount(pos, board) {
   var neighs = ''
   for (var i = pos.i - 1; i <= pos.i + 1; i++) {
@@ -313,6 +328,7 @@ function onRestart() {
   gMaxUndo = 3
   var elMaxUndo = document.querySelector('.undo-container .clicks')
   elMaxUndo.innerHTML = gMaxUndo
+  gPressIsOn = false
   resetHints()
   resetStopwatch()
   onInit()
@@ -341,49 +357,6 @@ function markAllmines() {
   elSmiley.innerHTML = '🤯'
   gGame.isOn = false
   stopStopwatch()
-}
-
-function onCellMarked(ev) {
-  if (isVictory()) return
-  console.log('hi:')
-  if (ev.button === 2) {
-    ev.preventDefault() //
-
-    var classNameCell = '.' + ev.srcElement.classList[1]
-    var elCell = document.querySelector(classNameCell)
-
-    // console.log(classNameCell.indexOf('-') + 1)
-    // console.log(classNameCell.indexOf('-', classNameCell.indexOf('-') + 1) + 1)
-
-    // find the indexes of {i,j} of the cell
-    var cellIdx = {
-      i: +classNameCell[classNameCell.indexOf('-') + 1],
-      j: +classNameCell[classNameCell.indexOf('-', classNameCell.indexOf('-') + 1) + 1],
-    }
-    // you cant mark a cell if it show!
-    if (gBoard[cellIdx.i][cellIdx.j].isShow) return
-
-    if (!gBoard[cellIdx.i][cellIdx.j].isMarked) {
-      //Model Update:
-      gBoard[cellIdx.i][cellIdx.j].isMarked = true
-
-      //Dom Update:
-      elCell.innerHTML = '🚩'
-      if (isVictory()) {
-      }
-    } else if (gBoard[cellIdx.i][cellIdx.j].isMarked) {
-      //Model Update:
-      gBoard[cellIdx.i][cellIdx.j].isMarked = false
-      //Dom Update:
-      elCell.innerHTML = ''
-    }
-
-    // console.log('cellIdx.i:', cellIdx.i)
-    // console.log('cellIdx.j:', cellIdx.j)
-    markedCount()
-    countMines()
-  }
-  isVictory()
 }
 
 function onDiffchose(elBtn) {
@@ -458,9 +431,8 @@ function markedCount() {
 
 //Bonuses!
 
-//bonus: hints
+//bonus:Hints
 
-// added the function on the render
 function onHintClick(el) {
   if (!gGame.isOn) return
   el.innerHTML = '💡'
@@ -582,7 +554,6 @@ function onSafeClick() {
 function onLightMode() {
   var elBody = document.body
   var elBtn = document.querySelector('.lightmode')
-
   // console.log(elBtn)
 
   elBody.classList.toggle('lightmodebackground')
@@ -768,4 +739,64 @@ function onUndoClick() {
   gUndoLocations = []
 
   shownCount()
+}
+
+function startPress(ev, i, j) {
+  if (!gGame.isOn || gBoard[i][j].isMarked) return
+  pressTimer = setTimeout(function () {
+    console.log('long press')
+    onCellMarked(ev)
+    gPressIsOn = true
+  }, 1000)
+}
+
+function endPress() {
+  clearTimeout(pressTimer)
+  console.log('clear')
+  gPressIsOn = false
+}
+
+function onCellMarked(ev) {
+  ev.preventDefault()
+  console.log(ev.pointerType)
+  console.log('onCellMarked trigged')
+  console.log('ev:', ev)
+  if (isVictory() || !gGame.isOn || ev.pointerType === 'touch') return
+  console.log('hi:')
+  //
+
+  // Assuming the cell element has a class in the format "cell-i-j"
+  var classNameCell = ev.srcElement.classList[1] // e.g., "cell-10-3"
+  var parts = classNameCell.split('-') // results in ["cell", "10", "3"]
+  var cellIdx = {
+    i: +parts[1],
+    j: +parts[2],
+  }
+
+  // Now toggle flag safely using cellIdx.i and cellIdx.j
+  var elCell = document.querySelector('.' + classNameCell)
+
+  // you cant mark a cell if it show!
+  if (gBoard[cellIdx.i][cellIdx.j].isShow) return
+
+  if (!gBoard[cellIdx.i][cellIdx.j].isMarked) {
+    //Model Update:
+    gBoard[cellIdx.i][cellIdx.j].isMarked = true
+
+    //Dom Update:
+    elCell.innerHTML = '🚩'
+  } else if (gBoard[cellIdx.i][cellIdx.j].isMarked) {
+    //Model Update:
+    gBoard[cellIdx.i][cellIdx.j].isMarked = false
+    //Dom Update:
+    elCell.innerHTML = ''
+    gGame.markedCount--
+  }
+
+  // console.log('cellIdx.i:', cellIdx.i)
+  // console.log('cellIdx.j:', cellIdx.j)
+  markedCount()
+  countMines()
+
+  isVictory()
 }
