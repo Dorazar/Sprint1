@@ -748,6 +748,7 @@ function startPress(ev, i, j) {
     onCellMarked(ev)
     gPressIsOn = true
   }, 1000)
+  isVictory()
 }
 
 function endPress() {
